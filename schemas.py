@@ -6,18 +6,33 @@ class Role(str, Enum):
     user = "user"
 
 class User(BaseModel):
-    id: int
+    username: str
     name: str
     surname: str
     email: str
-    password: str
     role: Role
     
     class Config:
         orm_mode = True
+
+class UserInDB(User):
+    id: int
+    hashed_password: str
+    
+class UserIn(User): 
+    password: str
     
 class Post(BaseModel):
     id: int
     user_id: int
     text: str
+    
+class Token(BaseModel):
+    access_token: str
+    token_type: str
+    
+class TokenData(BaseModel):
+    username: str | None = None
+
+    
     
