@@ -8,3 +8,7 @@ Założenia:
 - użytkownik może zmienić hasło, imie, nazwisko, oraz email
 - bezpieczeństwo na podstawie OAuth2
 - post jest edytowalny przez użytkownika, który go stworzył
+
+
+Biblioteka użyta do logowania:
+https://docs.python.org/3/howto/logging.html
