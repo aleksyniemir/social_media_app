@@ -1,34 +1,34 @@
-from fastapi import FastAPI, Depends, HTTPException, status
-from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
-from utils import get_current_user, fake_users_db, hash_password, authenticate_user, get_password_hash, create_access_token, ACCESS_TOKEN_EXPIRE_MINUTES, get_current_user_if_admin, get_max_id
+from fastapi import APIRouter
+from fastapi import Depends, HTTPException, status
+from fastapi.security import  OAuth2PasswordRequestForm
 from datetime import timedelta
-from operator import attrgetter
-import logging.config
-import logging
-import schemas
-import models
 
-app = FastAPI()
+from src.dependencies import get_password_hash,  ACCESS_TOKEN_EXPIRE_MINUTES, create_access_token
+from src.crud.users import get_current_user, authenticate_user, get_current_user_if_admin
+from src.schemas.roles import Role
+from src.schemas.users import User, UserCreate
+from src.schemas.tokens import TokenData
 
-logging.config.fileConfig('logging.conf', disable_existing_loggers=False)
-logger = logging.getLogger(__name__)
+router = APIRouter(
+    prefix = "/users",
+    tags = ["users"],
+    responses={404: {"description": "Not found"}},
+)
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
-
-@app.get("/user/{user_id}", status_code=status.HTTP_200_OK)
-def get_user(user_id: int, current_user: schemas.User = Depends(get_current_user)):
+@router.get("/{user_id}", status_code=status.HTTP_200_OK)
+def get_user(user_id: int, current_user: User = Depends(get_current_user)):
     #user = next((u for u in fake_users_db if u.id == user_id), None)
     user = next((u for u in fake_users_db if u["id"] == user_id), None)
     return user
 
-@app.get("/user/me")
-def get_users_me(current_user: schemas.User = Depends(get_current_user)):
+@router.get("/me")
+def get_users_me(current_user: User = Depends(get_current_user)):
     return current_user
     
-@app.post("/user/add", status_code=status.HTTP_201_CREATED)
+@router.post("/add", status_code=status.HTTP_201_CREATED)
 def add_user(
-    user: schemas.UserIn, current_user: schemas.User = Depends(get_current_user_if_admin)
-    ) -> models.User:
+    user: UserCreate, current_user: User = Depends(get_current_user_if_admin)
+    ) -> User:
     if len(fake_users_db) == 0:
         u_id = 0
     else:
@@ -59,8 +59,8 @@ def add_user(
     return user_dict
 
 
-@app.delete("/user/remove/{user_id}", status_code=status.HTTP_204_NO_CONTENT)
-def remove_user(user_id: int, current_user: schemas.User = Depends(get_current_user_if_admin)):
+@router.delete("/remove/{user_id}", tags = ["users"], status_code=status.HTTP_204_NO_CONTENT)
+def remove_user(user_id: int, current_user: User = Depends(get_current_user_if_admin)):
     global fake_users_db
     #user = next((u for u in fake_users_db if u.id == user_id), None)
     user = next((u for u in fake_users_db if u["id"] == user_id), None)
@@ -72,7 +72,7 @@ def remove_user(user_id: int, current_user: schemas.User = Depends(get_current_u
     
     fake_users_db = [d for d in fake_users_db if d.get("id") != user_id]
     
-@app.post("/token")
+@router.post("/token", tags = ["users"])
 def login(form_data: OAuth2PasswordRequestForm = Depends()): 
     user = authenticate_user(form_data.username, form_data.password)
     if not user:
@@ -86,4 +86,3 @@ def login(form_data: OAuth2PasswordRequestForm = Depends()):
         data={"sub": user.username}, expires_delta=access_token_expires
     )
     return {"access_token": access_token, "token_type": "bearer"}
-

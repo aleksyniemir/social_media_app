@@ -1,9 +1,8 @@
 from fastapi.testclient import TestClient
-from fastapi import FastAPI
-from utils import get_max_id, fake_users_db, get_user_by_username, create_user
-from main import app
 import pytest
-import schemas
+
+from src.main import app
+from src.crud.users import get_max_id, fake_users_db, get_user_by_username, create_user
 
 client = TestClient(app)
 
@@ -18,7 +17,7 @@ def user_authentication_headers(username: str, password: str):
 def authentication_token_from_username(username: str):
     user = get_user_by_username(username)
     if not user:
-        user_in_create = schemas.UserIn(
+        user_in_create = users.UserIn(
             username=username, name="tomek", surname="b",
             email="tomekb", role="user", password="haslo123")
         create_user(user_in_create)

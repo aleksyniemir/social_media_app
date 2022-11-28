@@ -1,5 +1,5 @@
-from database import Base
-from schemas import Role
+from src.db.database import Base
+from src.schemas.roles import Role
 from sqlalchemy import String, Integer, Enum, Column
 
 class User(Base):

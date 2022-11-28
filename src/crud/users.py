@@ -1,17 +1,10 @@
-from schemas import User, Role, TokenData
 from fastapi import Depends, HTTPException, status
-from fastapi.security import OAuth2PasswordBearer
-from passlib.context import CryptContext
-from typing import List, Dict
-from schemas import User, UserInDB
 from jose import JWTError, jwt
-from datetime import datetime, timedelta
-import schemas
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
-SECRET_KEY = "41cf6049116ed36440bd2fc311485f89d3a485bf05e97a3ac03412566abb21f0"
-ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 30
+from src.dependencies import oauth2_scheme, SECRET_KEY, ALGORITHM, get_password_hash, verify_password 
+from src.schemas.roles import Role
+from src.schemas.users import User, UserCreate
+from src.schemas.tokens import TokenData
 
 fake_users_db = [
     {
@@ -32,24 +25,21 @@ fake_users_db = [
         "hashed_password": "$2b$12$LVVUe4vPKiWr/KM3kxYC/urKLcHz.LEx7OvwIHkDjPRpfrURBkLu.",
         "role": Role.admin,
     }
-    ]
+]
 
-def fake_decode_token(token):
-    return User(
-        id = 0,
-        username = "dupaaa",
-        name = token,
-        surname = "str",
-        email = "ee",
-        hashed_password = "ddd",
-        role = Role.user
-    )
+def authenticate_user(username: str, password: str):
+    user = get_user(username)
+    if not user:
+        return False
+    if not verify_password(plain_password=password, hashed_password=user.hashed_password):
+        return False
+    return user
 
 def get_user(username: str):
     user_dict = next((u for u in fake_users_db if u["username"] == username), None)
     if not user_dict:
         raise HTTPException(status_code=400, detail="Incorrect user id")
-    user = UserInDB(**user_dict)
+    user = User(**user_dict)
     return user
 
 def get_current_user(token: str = Depends(oauth2_scheme)):
@@ -71,7 +61,7 @@ def get_current_user(token: str = Depends(oauth2_scheme)):
         raise credentials_exception
     return user
 
-def get_current_user_if_admin(user: schemas.User = Depends(get_current_user)):
+def get_current_user_if_admin(user: User = Depends(get_current_user)):
     if user.role == Role.admin:
         return user
     else:
@@ -81,26 +71,6 @@ def get_current_user_if_admin(user: schemas.User = Depends(get_current_user)):
             headers={"WWW-Authenticate": "Bearer"},
         )
         
-
-def hash_password(plain_password: str):
-    return plain_password + "_fakehash"
-
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-
-def verify_password(plain_password: str, hashed_password: str):
-    return pwd_context.verify(plain_password, hashed_password)
-
-def get_password_hash(password: str):
-    return pwd_context.hash(password)
-
-def authenticate_user(username: str, password: str):
-    user = get_user(username)
-    if not user:
-        return False
-    if not verify_password(plain_password=password, hashed_password=user.hashed_password):
-        return False
-    return user
-
 def get_max_id():
     u_id = max(fake_users_db, key=lambda x: x['id'])['id'] + 1
     return u_id
@@ -109,7 +79,7 @@ def get_user_by_username(username: str):
     user = next((u for u in fake_users_db if u["username"] == username), None)
     return user
 
-def create_user(user: schemas.UserIn):
+def create_user(user: UserCreate):
     u_id = get_max_id()
     hashed_password = get_password_hash(user.password)
     user = {
@@ -123,13 +93,3 @@ def create_user(user: schemas.UserIn):
     }
     fake_users_db.append(user)
     return user
-    
-def create_access_token(data: dict, expires_delta: timedelta | None = None):
-    to_encode = data.copy()
-    if expires_delta:
-        expire = datetime.utcnow() + expires_delta
-    else:
-        expire = datetime.utcnow() + timedelta(minutes=15)
-    to_encode.update({"exp": expire})
-    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
-    return encoded_jwt
