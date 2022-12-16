@@ -1,6 +1,7 @@
 from sqlalchemy import String, Integer, Enum, Column, ForeignKey
 from sqlalchemy.orm import relationship
 from src.db.database import Base
+from src.models.groups import users_groups_association_table 
 
 class Role(Base):
     __tablename__ = "roles"
@@ -19,8 +20,13 @@ class User(Base):
     surname = Column(String(255), nullable = False)
     email = Column(String(255), nullable = False, unique=True)
     hashed_password = Column(String(255))
+    
 
     role_id = Column(Integer, ForeignKey(Role.id), nullable = False)
+    
+    groups = relationship(
+        "Group", secondary=users_groups_association_table, back_populates="users"
+    )
     
 
 
