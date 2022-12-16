@@ -1,12 +1,20 @@
 from pydantic import BaseModel
 from typing import List
 
+class Role(BaseModel):
+    id: int
+    role: str
+    
+    class Config:
+        orm_mode = True
+    
 class UserBase(BaseModel):
     username: str
     name: str
     surname: str
     email: str
-    #role: Role
+    
+    role: Role
 
 class User(UserBase):
     id: int
