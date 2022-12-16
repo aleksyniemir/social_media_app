@@ -1,13 +1,14 @@
-from fastapi import APIRouter
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends, HTTPException, status, APIRouter
 from fastapi.security import  OAuth2PasswordRequestForm
 from datetime import timedelta
+from sqlalchemy.orm import Session
 
-from src.dependencies import get_password_hash,  ACCESS_TOKEN_EXPIRE_MINUTES, create_access_token
-from src.crud.users import get_current_user, authenticate_user, get_current_user_if_admin
-from src.schemas.roles import Role
-from src.schemas.users import User, UserCreate
+from src.dependencies import get_password_hash,  ACCESS_TOKEN_EXPIRE_MINUTES, create_access_token, get_db
+from src.crud.users import get_current_user, authenticate_user, get_current_user_if_admin, get_user
 from src.schemas.tokens import TokenData
+import src.models as models
+import src.crud as crud
+import src.schemas as schemas
 
 router = APIRouter(
     prefix = "/users",
@@ -15,66 +16,47 @@ router = APIRouter(
     responses={404: {"description": "Not found"}},
 )
 
-@router.get("/{user_id}", status_code=status.HTTP_200_OK)
-def get_user(user_id: int, current_user: User = Depends(get_current_user)):
-    #user = next((u for u in fake_users_db if u.id == user_id), None)
-    user = next((u for u in fake_users_db if u["id"] == user_id), None)
-    return user
+@router.get("/", status_code=status.HTTP_200_OK)
+def get_users(db: Session = Depends(get_db), current_user = Depends(get_current_user)):
+    users = crud.get_all_users(db)
+    serialized_users = schemas.UserList(users=users)
+    return serialized_users
 
-@router.get("/me")
-def get_users_me(current_user: User = Depends(get_current_user)):
+@router.get("/me", status_code=status.HTTP_200_OK)
+def get_user_me( db: Session = Depends(get_db),current_user = Depends(get_current_user)):
     return current_user
     
+
+@router.get("/{user_id}", status_code=status.HTTP_200_OK)
+def get_user(user_id: int, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
+    user = crud.get_user(db, user_id)
+    return user
+
 @router.post("/add", status_code=status.HTTP_201_CREATED)
 def add_user(
-    user: UserCreate, current_user: User = Depends(get_current_user_if_admin)
-    ) -> User:
-    if len(fake_users_db) == 0:
-        u_id = 0
-    else:
-        u_id = max(fake_users_db, key=lambda x: x['id'])['id'] + 1
-        #u_id = max(fake_users_db, key=attrgetter('id')).id + 1
-        
-    hashed_password = get_password_hash(user.password)
-    # uncomment when db is configured
-    # new_user = models.User(
-    #     id=u_id,
-    #     username=user.username,
-    #     name=user.name,
-    #     surname=user.surname,
-    #     email=user.email,
-    #     role=user.role,
-    #     hashed_password=hashed_password
-    # )
-    user_dict = {
-        "id": u_id,
-        "username": user.username,
-        "name": user.name,
-        "surname": user.surname,
-        "email": user.email,
-        "hashed_password": hashed_password,
-        "role": user.role,
-    }
-    fake_users_db.append(user_dict)
-    return user_dict
+    user: schemas.UserCreate, db: Session = Depends(get_db), current_user: schemas.User = Depends(get_current_user_if_admin)
+    ) -> models.User:
+    user_db_by_username = crud.get_user_by_username(db, username=user.username)
+    user_db_by_email = crud.get_user_by_email(db, email=user.email)
+    if user_db_by_email or user_db_by_username:
+        raise HTTPException(status_code=409, detail="Username or email already exists.")
+    new_user = crud.create_user(db, user)
+    return new_user
 
 
-@router.delete("/remove/{user_id}", tags = ["users"], status_code=status.HTTP_204_NO_CONTENT)
-def remove_user(user_id: int, current_user: User = Depends(get_current_user_if_admin)):
-    global fake_users_db
-    #user = next((u for u in fake_users_db if u.id == user_id), None)
-    user = next((u for u in fake_users_db if u["id"] == user_id), None)
-    
+@router.delete("/remove/{id}", tags = ["users"], status_code=status.HTTP_202_ACCEPTED)
+def remove_user(id: int, current_user: schemas.User = Depends(get_current_user_if_admin), db: Session = Depends(get_db)): 
+    user = crud.get_user(db, id)
     if not user:
         raise HTTPException(
             status_code=404, 
-            detail=f"Person with id={user_id} does not exist.")   
-    
-    fake_users_db = [d for d in fake_users_db if d.get("id") != user_id]
+            detail=f"Person with id={id} does not exist.")   
+    mes = crud.remove_user(db, id)
+    return mes
     
 @router.post("/token", tags = ["users"])
-def login(form_data: OAuth2PasswordRequestForm = Depends()): 
-    user = authenticate_user(form_data.username, form_data.password)
+def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)): 
+    user = authenticate_user(db, form_data.username, form_data.password)
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,

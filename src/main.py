@@ -1,20 +1,25 @@
 from fastapi import FastAPI
 from fastapi.security import OAuth2PasswordBearer
 from src.api import users
-from db.database import Base, engine
-import logging.config
-import logging
+from src.db.database import Base, engine
+# uncomment at the end of the project
+#import logging.config
+#import logging
+import os
+from dotenv import load_dotenv
 
-Base.metadata.create_all(bind=engine)
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+load_dotenv(os.path.join(BASE_DIR, ".env"))
 
 app = FastAPI()
 
 app.include_router(users.router)
 
-logging.config.fileConfig('logging.conf', disable_existing_loggers=False)
-logger = logging.getLogger(__name__)
+# uncomment at the end of the project
+# logging.config.fileConfig('logging.conf', disable_existing_loggers=False)
+# logger = logging.getLogger(__name__)
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="users/token")
 
 @app.get("/")
 async def hello():

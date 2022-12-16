@@ -2,10 +2,9 @@ from fastapi.security import OAuth2PasswordBearer
 from passlib.context import CryptContext
 from datetime import datetime, timedelta
 from jose import jwt
-from db.database import SessionLocal, engine
+from src.db.database import SessionLocal, engine
 
 import src.schemas as schemas
-from src.schemas.roles import Role
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="users/token")
 SECRET_KEY = "41cf6049116ed36440bd2fc311485f89d3a485bf05e97a3ac03412566abb21f0"
@@ -20,7 +19,6 @@ def fake_decode_token(token):
         surname = "str",
         email = "ee",
         hashed_password = "ddd",
-        role = Role.user
     )
 
 def hash_password(plain_password: str):

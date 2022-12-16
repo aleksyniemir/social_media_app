@@ -8,7 +8,6 @@ https://github.com/NEONKID/fastapi-ddd-example/blob/main/README.md
   "name": "tomek",
   "surname": "b",
   "email": "tomek@com",
-  "role": "user",
   "password": "haslo123"
 }
 

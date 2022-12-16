@@ -1,12 +1,12 @@
 from pydantic import BaseModel
-from src.schemas.roles import Role
+from typing import List
 
 class UserBase(BaseModel):
     username: str
     name: str
     surname: str
     email: str
-    role: Role
+    #role: Role
 
 class User(UserBase):
     id: int
@@ -14,6 +14,12 @@ class User(UserBase):
     
     class Config:
         orm_mode = True
+        
+class UserList(BaseModel):
+    users: List[User]
+    
+    class Config:
+        orm_model = True
     
 class UserCreate(UserBase): 
     password: str

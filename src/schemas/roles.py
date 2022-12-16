@@ -1,5 +1,6 @@
 from enum import Enum
 
-class Role(str, Enum):
-    admin = "admin"
-    user = "user"
+# TODO 
+# class Role(str, Enum):
+#     admin = "admin"
+#     user = "user"
