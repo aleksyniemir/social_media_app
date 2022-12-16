@@ -27,9 +27,9 @@ def get_user_me( db: Session = Depends(get_db),current_user = Depends(get_curren
     return current_user
     
 
-@router.get("/{user_id}", status_code=status.HTTP_200_OK)
-def get_user(user_id: int, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
-    user = crud.get_user(db, user_id)
+@router.get("/id}", status_code=status.HTTP_200_OK)
+def get_user(id: int, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
+    user = crud.get_user(db, id)
     return user
 
 @router.post("/add", status_code=status.HTTP_201_CREATED)
@@ -44,15 +44,70 @@ def add_user(
     return new_user
 
 
-@router.delete("/remove/{id}", tags = ["users"], status_code=status.HTTP_202_ACCEPTED)
+@router.delete("/remove/{id}", status_code=status.HTTP_202_ACCEPTED)
 def remove_user(id: int, current_user: schemas.User = Depends(get_current_user_if_admin), db: Session = Depends(get_db)): 
     user = crud.get_user(db, id)
     if not user:
         raise HTTPException(
             status_code=404, 
             detail=f"Person with id={id} does not exist.")   
-    mes = crud.remove_user(db, id)
-    return mes
+    msg = crud.remove_user(db, id)
+    return msg
+
+@router.put("/add_friend/{id}", status_code=status.HTTP_200_OK)
+def add_friend(id: int, current_user: schemas.User = Depends(get_current_user), db: Session = Depends(get_db)):
+    msg = crud.add_friend(db, user_me_id=current_user.id, user_add_id=id)
+    return msg
+    
+@router.delete("/remove_friend/{id}", status_code=status.HTTP_200_OK)
+def remove_friend(id: int, current_user: schemas.User = Depends(get_current_user), db: Session = Depends(get_db)):
+    msg = crud.remove_friend(db, user_me_id=current_user.id, user_remove_id=id)
+    return msg
+
+@router.get("/group/{id}", status_code=status.HTTP_200_OK)
+def get_group(id: int, db: Session = Depends(get_db), current_user = Depends(get_current_user)):
+    group = crud.get_group(db, id)
+    if not group:
+        return {"message": f"Group with id={id} does not exist."}
+    return group
+
+@router.get("/me/groups", status_code=status.HTTP_200_OK)
+def get_users_groups(db: Session = Depends(get_db), current_user = Depends(get_current_user)):
+    return current_user.groups
+
+@router.get("/groups", status_code=status.HTTP_200_OK)
+def get_groups(db: Session = Depends(get_db), current_user = Depends(get_current_user)):
+    groups = crud.get_groups(db)
+    return groups
+
+@router.put("/join_group/{id}", status_code=status.HTTP_200_OK)
+def join_group(id: int, current_user: schemas.User = Depends(get_current_user), db: Session = Depends(get_db)):
+    msg = crud.join_group(db, user_me_id=current_user.id, group_id=id)
+    return msg
+
+@router.delete("/leave_group/{id}", status_code=status.HTTP_200_OK)
+def leave_group(id: int, current_user: schemas.User = Depends(get_current_user), db: Session = Depends(get_db)):
+    msg = crud.leave_group(db, user_me_id=current_user.id, group_id=id)
+    return msg
+
+@router.post("/create_group")
+def create_group(group: schemas.GroupCreate, current_user: schemas.User = Depends(get_current_user), db: Session = Depends(get_db)):
+    group_in_db = crud.get_group_by_name(db, group.name)
+    if group_in_db:
+        raise HTTPException(status_code=409, detail="Group with such name already exists.")
+    new_group = crud.create_group(db, group, creator_id=current_user.id)
+    return new_group
+
+@router.delete("/remove_group/{id}", status_code=status.HTTP_202_ACCEPTED)
+def remove_group(id: int, current_user: schemas.User = Depends(get_current_user_if_admin), db: Session = Depends(get_db)): 
+    group = crud.get_group(db, id)
+    # TODO check if current user is creator
+    if not group:
+        raise HTTPException(
+            status_code=404, 
+            detail=f"Group with id={id} does not exist.")   
+    msg = crud.remove_group(db, id)
+    return msg
     
 @router.post("/token", tags = ["users"])
 def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)): 
