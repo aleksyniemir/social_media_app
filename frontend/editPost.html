@@ -1,0 +1,44 @@
+<head>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+  </head>
+<body>
+    <div class="input-group mb-3">
+        <input id="edit-post-input" type="text" class="form-control" placeholder="Post" aria-label="Username" aria-describedby="basic-addon1">
+    </div>
+    <div>
+        <button type="button" class="btn btn-light" onclick="editPost()">Edit post</button>
+    </div>
+</body>
+
+<script>
+
+    window.addEventListener("load", async (event) => {
+        event.preventDefault()
+        let input = document.getElementById("edit-post-input")
+        input.value = window.localStorage.getItem("postTextToEdit")
+    })
+
+    async function editPost() {
+        let post_id = window.localStorage.getItem("postIdToEdit")
+        let input = document.getElementById("edit-post-input")
+        const body = input.value 
+        console.log("body to be added to fetch: " + body)
+        let url ='http://127.0.0.1:8000/posts/update?id='+post_id
+        await fetch(url, {
+            method: 'PUT',
+            headers: {
+                'Accept': "application/json",
+                "Authorization": "Bearer " + window.localStorage.getItem("token"),
+                "Content-Type": "application/json",
+            },
+            body: '{"text": "'+ body +'"}'
+        }).then(function(response) {
+            return response.json();
+        }).then(function(respones) {
+            window.localStorage.setItem("postIdToEdit", null)
+            window.localStorage.setItem("postTextToEdit", null)
+            window.location.replace("./index.html")
+        })
+    }
+
+</script>

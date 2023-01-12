@@ -90,6 +90,9 @@ def remove_user(db: Session, id: int):
     db.commit()
     return {"message": f"User with id={id} was succesfully removed."}
 
+def get_friends(db: Session, user: schemas.User):
+    return user.friends
+
 def add_friend(db: Session, user_me_id: int, user_add_id: int):
     user_add = get_user(db, user_add_id)
     user_me = get_user(db, user_me_id)

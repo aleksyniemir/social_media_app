@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 
 from src.dependencies import get_password_hash,  ACCESS_TOKEN_EXPIRE_MINUTES, create_access_token, get_db
 from src.crud.users import get_current_user, authenticate_user, get_current_user_if_admin, get_user
-from src.schemas.tokens import TokenData
+from src.schemas.tokens import Token
 import src.models as models
 import src.crud as crud
 import src.schemas as schemas
@@ -23,11 +23,11 @@ def get_users(db: Session = Depends(get_db), current_user = Depends(get_current_
     return serialized_users
 
 @router.get("/me", status_code=status.HTTP_200_OK)
-def get_user_me( db: Session = Depends(get_db),current_user = Depends(get_current_user)):
+def get_user_me(db: Session = Depends(get_db), current_user = Depends(get_current_user)):
     return current_user
     
 
-@router.get("/id}", status_code=status.HTTP_200_OK)
+@router.get("/{id}", status_code=status.HTTP_200_OK)
 def get_user(id: int, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
     user = crud.get_user(db, id)
     return user
@@ -53,6 +53,11 @@ def remove_user(id: int, current_user: schemas.User = Depends(get_current_user_i
             detail=f"Person with id={id} does not exist.")   
     msg = crud.remove_user(db, id)
     return msg
+
+@router.get("/me/friends", status_code=status.HTTP_200_OK)
+def get_friends(current_user: schemas.User = Depends(get_current_user), db: Session = Depends(get_db)):
+    friends = crud.get_friends(db, current_user)
+    return friends
 
 @router.put("/add_friend/{id}", status_code=status.HTTP_200_OK)
 def add_friend(id: int, current_user: schemas.User = Depends(get_current_user), db: Session = Depends(get_db)):
@@ -109,7 +114,7 @@ def remove_group(id: int, current_user: schemas.User = Depends(get_current_user_
     msg = crud.remove_group(db, id)
     return msg
     
-@router.post("/token", tags = ["users"])
+@router.post("/token", tags = ["users"], response_model=Token)
 def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)): 
     user = authenticate_user(db, form_data.username, form_data.password)
     if not user:
@@ -122,4 +127,7 @@ def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depend
     access_token = create_access_token(
         data={"sub": user.username}, expires_delta=access_token_expires
     )
+    print("access_token: " + access_token + ", token_type: " +  "bearer")
     return {"access_token": access_token, "token_type": "bearer"}
+from fastapi.responses import JSONResponse
+

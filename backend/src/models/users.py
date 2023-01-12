@@ -60,6 +60,7 @@ class User(Base):
         "Group", secondary=users_groups_association_table, back_populates="users"
     )
     
+    posts = relationship("Post", back_populates="user")
     
 
     

@@ -1,0 +1,33 @@
+<head>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+  </head>
+<body>
+    <div class="input-group mb-3">
+        <input id="post-input" type="text" class="form-control" placeholder="Post" aria-label="Username" aria-describedby="basic-addon1">
+    </div>
+    <div>
+        <button type="button" class="btn btn-light" onclick="createPost()">Create post</button>
+    </div>
+</body>
+
+<script>
+    async function createPost() {
+        const input = document.getElementById("post-input")
+        const body = input.value 
+        console.log("body to be added to fetch: " + body)
+        await fetch('http://127.0.0.1:8000/posts/add', {
+            method: 'POST',
+            headers: {
+                'Accept': "application/json",
+                "Authorization": "Bearer " + window.localStorage.getItem("token"),
+                "Content-Type": "application/json",
+            },
+            body: '{"text": "'+ body +'"}'
+        }).then(function(response) {
+            return response.json();
+        }).then(function(respones) {
+            window.location.replace("./index.html")
+        })
+    }
+
+</script>

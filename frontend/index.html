@@ -1,20 +1,8 @@
 <html lang="en">
 
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="">
-    <meta name="author" content="Mark Otto, Jacob Thornton, and Bootstrap contributors">
-    <meta name="generator" content="Hugo 0.104.2">
-    <title>Sidebars · Bootstrap v5.2</title>
-
-    <link rel="canonical" href="https://getbootstrap.com/docs/5.2/examples/sidebars/">
-
-    
-
-    
-
 <link href="bootstrap.min.css" rel="stylesheet">
+<link href="../assets/dist/css/bootstrap.min.css" rel="stylesheet">
 
     <style>
       .bd-placeholder-img {
@@ -71,50 +59,94 @@
 
     
     <!-- Custom styles for this template -->
-     <!-- <link href="sidebars.css" rel="stylesheet"> -->
+    <link href="cheatsheet.css" rel="stylesheet">
+
+    <style>
+      .bd-placeholder-img {
+        font-size: 1.125rem;
+        text-anchor: middle;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        user-select: none;
+      }
+
+      @media (min-width: 768px) {
+        .bd-placeholder-img-lg {
+          font-size: 3.5rem;
+        }
+      }
+
+      .b-example-divider {
+        height: 3rem;
+        background-color: rgba(0, 0, 0, .1);
+        border: solid rgba(0, 0, 0, .15);
+        border-width: 1px 0;
+        box-shadow: inset 0 .5em 1.5em rgba(0, 0, 0, .1), inset 0 .125em .5em rgba(0, 0, 0, .15);
+      }
+
+      .b-example-vr {
+        flex-shrink: 0;
+        width: 1.5rem;
+        height: 100vh;
+      }
+
+      .bi {
+        vertical-align: -.125em;
+        fill: currentColor;
+      }
+
+      .nav-scroller {
+        position: relative;
+        z-index: 2;
+        height: 2.75rem;
+        overflow-y: hidden;
+      }
+
+      .nav-scroller .nav {
+        display: flex;
+        flex-wrap: nowrap;
+        padding-bottom: 1rem;
+        margin-top: -1px;
+        overflow-x: auto;
+        text-align: center;
+        white-space: nowrap;
+        -webkit-overflow-scrolling: touch;
+      }
+    </style>
+    <link href="https://fonts.googleapis.com/css?family=Playfair&#43;Display:700,900&amp;display=swap" rel="stylesheet">
+    
   </head>
 
 <body>
-    
+  <div>
+    <button type="button" class="btn btn-light" onclick="createPost()">Create post</button>
+  </div>
 
-    <div class="d-flex flex-column align-items-stretch flex-shrink-0 bg-white" style="width: 380px;">
-        <a href="/" class="d-flex align-items-center flex-shrink-0 p-3 link-dark text-decoration-none border-bottom">
-          <svg class="bi pe-none me-2" width="30" height="24"><use xlink:href="#bootstrap"/></svg>
-          <span class="fs-5 fw-semibold">List group</span>
-        </a>
-        <div class="list-group list-group-flush border-bottom scrollarea">
-          <a href="#" class="list-group-item list-group-item-action active py-3 lh-sm" aria-current="true">
-            <div class="d-flex w-100 align-items-center justify-content-between">
-              <strong class="mb-1">List group item heading</strong>
-              <small>Wed</small>
-            </div>
-            <div class="col-10 mb-1 small">Some placeholder content in a paragraph below the heading and date.</div>
-          </a>
-          <a href="#" class="list-group-item list-group-item-action py-3 lh-sm">
-            <div class="d-flex w-100 align-items-center justify-content-between">
-              <strong class="mb-1">List group item heading</strong>
-              <small class="text-muted">Tues</small>
-            </div>
-            <div class="col-10 mb-1 small">Some placeholder content in a paragraph below the heading and date.</div>
-          </a>
-          <a href="#" class="list-group-item list-group-item-action py-3 lh-sm">
-            <div class="d-flex w-100 align-items-center justify-content-between">
-              <strong class="mb-1">List group item heading</strong>
-              <small class="text-muted">Mon</small>
-            </div>
-            <div class="col-10 mb-1 small">Some placeholder content in a paragraph below the heading and date.</div>
-          </a>
-          <a href="#" class="list-group-item list-group-item-action py-3 lh-sm" aria-current="true">
-            <div class="d-flex w-100 align-items-center justify-content-between">
-              <strong class="mb-1">List group item heading</strong>
-              <small class="text-muted">Wed</small>
-            </div>
-            <div class="col-10 mb-1 small">Some placeholder content in a paragraph below the heading and date.</div>
-          </a>
-        </div>
-    </div>  
-        
-    <p id="response"></p>
+  <div id="choose-page"></div>
+  
+  <div id="filter-div">
+    <div class="input-group mb-3">
+      <input id="filter-input" type="text" class="form-control" placeholder="filter posts by username" aria-label="Recipient's username" aria-describedby="basic-addon2">
+      <div class="input-group-append">
+        <button class="btn btn-outline-secondary" type="button" id="button-filter" >Filter</button>
+      </div>
+    </div>
+  </div> 
+
+
+  <div id="posts-list"></div>
+  
+  <div class="d-flex flex-column align-items-stretch flex-shrink-0 bg-white" style="width: 380px;">
+      <a  class="d-flex align-items-center flex-shrink-0 p-3 link-dark text-decoration-none border-bottom">
+        <svg class="bi pe-none me-2" width="30" height="24"><use xlink:href="#bootstrap"/></svg>
+        <span class="fs-5 fw-semibold">Friends</span>
+      </a>
+      <div class="list-group list-group-flush border-bottom scrollarea">
+        <div id="friends_list"></div>
+  </div>  
+      
+  <button onclick="logout()" type="button" class="btn btn-danger">Logout</button>
+  <p id="response"></p>
 </body>
 
 
@@ -122,29 +154,168 @@
 <script>
     src="bootstrap.bundle.min.js"
     src="sidebars.js"
-    //fetch('http://127.0.0.1:8000/')
-    //.then(res => res.json())
-    //.then(data => {console.log(data)})
-    var responseText = document.getElementById('response')
-    var message = null;
 
-    const xhr = new XMLHttpRequest();
-    const url = "http://127.0.0.1:8000/";
+    async function logout() {
+      window.localStorage.setItem("token", null);
+      window.location.replace("./login.html")
+    }
 
-    xhr.open("GET", url)
-    //xhr.setRequestHeader('Authorization', 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJvbGVrbmllbWlya2EiLCJleHAiOjE2NzE4MDA3MjN9.wE_kABc6ZUX6QYOctRIZULGm8n-0Ae43zBdx4TrFv7E')
-    //xhr.setRequestHeader('Content-type', 'application/json')
-    xhr.setRequestHeader('Content-type', 'application/json')
-    console.log(xhr.status)
-    console.log(xhr.withCredentials)
-    console.log(xhr.getAllResponseHeaders())
-    //xhr.setRequestHeader('Origin', 'http://127.0.0.1:8000/')
-    xhr.onload = (res) => {
-        console.log(res['target']['response']);
-        message = res['target']['response'];
-        console.log(message)
-        console.log(responseText)
-        responseText.innerHTML = message;
-    };
-    xhr.send()
+    async function createPost() {
+      window.location.replace("./createPost.html")
+    }    
+
+    async function deletePost(id) { 
+      url = 'http://127.0.0.1:8000/posts/remove?id='+id
+      await fetch(url, {
+        method: 'DELETE',
+        headers: {
+            'Accept': "application/json",
+            "Authorization": "Bearer " + window.localStorage.getItem("token"),
+        }
+      }).then(function(response) {
+        return response.json();
+      }).then(function(data) {
+        changePage(1, 'undefined')
+        loadNumberOfPages()
+      });
+    }
+
+    async function editPost(id, text) { 
+      window.localStorage.setItem("postIdToEdit", id)
+      window.localStorage.setItem("postTextToEdit", text)
+      window.location.replace("./editPost.html")
+    }
+
+    async function changePage(n, username) {
+      if (n == -1) {
+        n = document.getElementById("leave").value
+      }
+      let url = ""
+      url = 'http://127.0.0.1:8000/posts/?n_page=' + n + "&username_filter="+username      
+      console.log(url)
+      await fetch(url, {
+        method: 'GET',
+        headers: {
+            'Accept': "application/json",
+            "Authorization": "Bearer " + window.localStorage.getItem("token"),
+        }
+      }).then(function(response) {
+        return response.json();
+      }).then(function(data) {
+        console.log(data);  // { "userId": 1, "id": 1, "title": "...", "body": "..." }
+
+        let postsHtml = "";
+        console.log("data - posts")
+        console.log(data)
+        for (const post of data) {
+          postsHtml = postsHtml + `
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <div class="row g-0 border rounded overflow-hidden flex-md-row mb-4 shadow-sm h-md-250 position-relative">
+                <div class="col p-4 d-flex flex-column position-static">
+                  <h3 class="mb-0">`+ post.username+`</h3>
+                  <p class="card-text mb-auto">` + post.text +`</p>
+                  <div class="bd-example" >
+                    <button onclick="editPost(` + post.id + ", '"+ post.text+ `')" type="button" class="btn btn-primary">Edit</button>
+                    <button onclick=deletePost(`+post.id+`) type="button" class="btn btn-danger">Delete</button>
+                  </div>
+                </div>
+                
+              </div>
+            </div>
+          </div>  `
+        }
+        document.getElementById("posts-list").innerHTML = postsHtml
+      });
+    }
+    
+    async function loadNumberOfPages() {
+      let choosePageHtml = ""
+        await fetch('http://127.0.0.1:8000/posts/number_of_pages', {
+          method: 'GET',
+          headers: {
+              'Accept': "application/json",
+              "Authorization": "Bearer " + window.localStorage.getItem("token"),
+          }
+        }).then(function(response) {
+          return response.json();
+        }).then(function(data) {
+          console.log("n of pages data")
+          console.log(data)
+          choosePageHtml =  `
+          <div class="input-group">
+            <select class="custom-select" id="leave" onchange="changePage(`+ -1 +`, 'undefined')">`
+          console.log("options:")
+          for (let i = 1; i <= data; i++) {
+            console.log(i)
+            choosePageHtml =  choosePageHtml + `
+                <option value=` + i + `>` +i+`</option> `
+          }
+        })
+
+        choosePageHtml =  choosePageHtml + `
+            </select>      
+          </div>
+          `
+        console.log("choosePageHtml")
+        console.log(choosePageHtml)
+        document.getElementById("choose-page").innerHTML = choosePageHtml
+    }
+
+
+    window.addEventListener("load", async (event) => {
+        event.preventDefault()
+
+
+        loadNumberOfPages()
+
+
+        
+
+        changePage(1, "undefined")
+        
+        let filter_btn = document.getElementById("button-filter")
+        filter_btn.onclick = function() {
+          let filter_input = document.getElementById("filter-input")
+          let val = filter_input.value
+          n = document.getElementById("leave").value
+          console.log("n_page in filter_button " + n)
+          console.log("filter_input.value in filter_button " + val)
+          changePage(n, val)
+        }
+              
+
+
+
+
+        await fetch('http://127.0.0.1:8000/users/me/friends/', {
+            method: 'GET',
+            headers: {
+                'Accept': "application/json",
+                "Authorization": "Bearer " + window.localStorage.getItem("token"),
+            }
+        }).then(function(response) {
+            return response.json();
+          }).then(function(data) {
+            console.log("friends - data")
+            console.log(data);  // { "userId": 1, "id": 1, "title": "...", "body": "..." }
+
+            let friendsHtml = "";
+            console.log("data[users] - friends")
+            console.log(data["users"])
+            for (const user of data) {
+              friendsHtml = friendsHtml + `
+              <a href='#'' class='list-group-item list-group-item-action  py-3 lh-sm' aria-current='true'> 
+                <div class='d-flex w-100 align-items-center justify-content-between'> 
+                  <strong class='mb-1'>` + user.name + " " + user.surname + `</strong> 
+                </div> 
+              </a> 
+              `
+            }
+            document.getElementById("friends_list").innerHTML = friendsHtml
+          });
+  })
 </script>
+
+
+

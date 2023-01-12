@@ -21,14 +21,15 @@ class UserBase(BaseModel):
     name: str
     surname: str
     email: str
-    friends: List[UserMinimalInfo]
-    groups: List[GroupBase]
-    
     role: Role
+    
 
 class User(UserBase):
     id: int
     hashed_password: str
+    friends: List[UserMinimalInfo]
+    groups: List[GroupBase]
+    
     
     class Config:
         orm_mode = True
