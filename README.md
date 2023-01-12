@@ -1,14 +1,11 @@
 Na projekt zaliczeniowy postanowiłem stworzyć prymitywną aplikację social 
 media (typu Facebook lub Reddit). Aplikacja jest stworzona w FastAPI. Baza 
-danych jest w PostgreSQL+
+danych jest w PostgreSQL+, i frontend w Vanilla JS
 
 Założenia: 
 - użytkownik może wstawić tekstowy post na stronę 
-- post jest widoczny dla każdego innego użytkownika
-- użytkownik może zmienić hasło, imie, nazwisko, oraz email
+- post jest widoczny dla znajomych
 - bezpieczeństwo na podstawie OAuth2
 - post jest edytowalny przez użytkownika, który go stworzył
-
-
-Biblioteka użyta do logowania:
-https://docs.python.org/3/howto/logging.html
+- post można usunąć
+- wyświetlane jest 5 postów na stronę
