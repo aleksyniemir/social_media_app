@@ -11,19 +11,6 @@ SECRET_KEY = "41cf6049116ed36440bd2fc311485f89d3a485bf05e97a3ac03412566abb21f0"
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
-def fake_decode_token(token):
-    return schemas.User(
-        id = 0,
-        username = "dupaaa",
-        name = token,
-        surname = "str",
-        email = "ee",
-        hashed_password = "ddd",
-    )
-
-def hash_password(plain_password: str):
-    return plain_password + "_fakehash"
-
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 def verify_password(plain_password: str, hashed_password: str):

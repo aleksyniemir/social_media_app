@@ -3,8 +3,8 @@ from fastapi.security import  OAuth2PasswordRequestForm
 from datetime import timedelta
 from sqlalchemy.orm import Session
 
-from src.dependencies import get_password_hash,  ACCESS_TOKEN_EXPIRE_MINUTES, create_access_token, get_db
-from src.crud.users import get_current_user, authenticate_user, get_current_user_if_admin, get_user
+from src.dependencies import ACCESS_TOKEN_EXPIRE_MINUTES, create_access_token, get_db
+from src.crud.users import get_current_user, authenticate_user 
 from src.schemas.tokens import Token
 import src.models as models
 import src.crud as crud
@@ -34,7 +34,7 @@ def get_user(id: int, db: Session = Depends(get_db), current_user: models.User =
 
 @router.post("/add", status_code=status.HTTP_201_CREATED)
 def add_user(
-    user: schemas.UserCreate, db: Session = Depends(get_db), current_user: schemas.User = Depends(get_current_user_if_admin)
+    user: schemas.UserCreate, db: Session = Depends(get_db), current_user: schemas.User = Depends(get_current_user)
     ) -> models.User:
     user_db_by_username = crud.get_user_by_username(db, username=user.username)
     user_db_by_email = crud.get_user_by_email(db, email=user.email)
@@ -45,7 +45,7 @@ def add_user(
 
 
 @router.delete("/remove/{id}", status_code=status.HTTP_202_ACCEPTED)
-def remove_user(id: int, current_user: schemas.User = Depends(get_current_user_if_admin), db: Session = Depends(get_db)): 
+def remove_user(id: int, current_user: schemas.User = Depends(get_current_user), db: Session = Depends(get_db)): 
     user = crud.get_user(db, id)
     if not user:
         raise HTTPException(
@@ -104,9 +104,8 @@ def create_group(group: schemas.GroupCreate, current_user: schemas.User = Depend
     return new_group
 
 @router.delete("/remove_group/{id}", status_code=status.HTTP_202_ACCEPTED)
-def remove_group(id: int, current_user: schemas.User = Depends(get_current_user_if_admin), db: Session = Depends(get_db)): 
+def remove_group(id: int, current_user: schemas.User = Depends(get_current_user), db: Session = Depends(get_db)): 
     group = crud.get_group(db, id)
-    # TODO check if current user is creator
     if not group:
         raise HTTPException(
             status_code=404, 
@@ -129,5 +128,4 @@ def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depend
     )
     print("access_token: " + access_token + ", token_type: " +  "bearer")
     return {"access_token": access_token, "token_type": "bearer"}
-from fastapi.responses import JSONResponse
 

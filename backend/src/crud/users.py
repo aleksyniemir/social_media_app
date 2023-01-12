@@ -58,17 +58,6 @@ def get_current_user(db: Session = Depends(get_db), token: str = Depends(oauth2_
         raise credentials_exception
     return user
 
-def get_current_user_if_admin(user: User = Depends(get_current_user)):
-    # if user.role == Role.admin:
-    #     return user
-    # else:
-    #     raise HTTPException(
-    #         status_code=status.HTTP_401_UNAUTHORIZED,
-    #         detail="Your role does not have the privelege to remove an user",
-    #         headers={"WWW-Authenticate": "Bearer"},
-    #     )
-    return 1
-
 def create_user(db: Session, user: UserCreate):
     hashed_password = get_password_hash(user.password)
     new_user = models.User(
